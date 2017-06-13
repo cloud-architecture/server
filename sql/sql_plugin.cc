@@ -1397,7 +1397,7 @@ static int plugin_initialize(MEM_ROOT *tmp_root, struct st_plugin_int *plugin,
 
   if (options_only || state == PLUGIN_IS_DISABLED)
   {
-    ret= 0;
+    ret= !options_only && plugin_is_forced(plugin);
     state= PLUGIN_IS_DISABLED;
     goto err;
   }
