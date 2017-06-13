@@ -1,4 +1,4 @@
---source include/innodb_page_size.inc
+--source include/have_innodb.inc
 # Embedded mode doesn't allow restarting
 --source include/not_embedded.inc
 
