@@ -253,6 +253,13 @@ struct st_item_value_holder : public st_mysql_value
 };
 
 
+bool plugin_is_forced(struct st_plugin_int *p)
+{
+  return p->load_option == PLUGIN_FORCE ||
+         p->load_option == PLUGIN_FORCE_PLUS_PERMANENT;
+}
+
+
 /*
   stored in bookmark_hash, this structure is never removed from the
   hash and is used to mark a single offset for a thd local variable
@@ -1614,7 +1621,7 @@ int plugin_init(int *argc, char **argv, int flags)
   DBUG_ASSERT(plugin_ptr || !mysql_mandatory_plugins[0]);
   if (plugin_ptr)
   {
-    DBUG_ASSERT(plugin_ptr->load_option == PLUGIN_FORCE);
+    DBUG_ASSERT(plugin_is_forced(plugin_ptr));
 
     if (plugin_initialize(&tmp_root, plugin_ptr, argc, argv, false))
       goto err_unlock;
@@ -1700,8 +1707,7 @@ int plugin_init(int *argc, char **argv, int flags)
   while ((plugin_ptr= *(--reap)))
   {
     mysql_mutex_unlock(&LOCK_plugin);
-    if (plugin_ptr->load_option == PLUGIN_FORCE ||
-        plugin_ptr->load_option == PLUGIN_FORCE_PLUS_PERMANENT)
+    if (plugin_is_forced(plugin_ptr))
       reaped_mandatory_plugin= TRUE;
     plugin_deinitialize(plugin_ptr, true);
     mysql_mutex_lock(&LOCK_plugin);
@@ -3644,8 +3650,7 @@ static int construct_options(MEM_ROOT *mem_root, struct st_plugin_int *tmp,
                                                   plugin_dash.length + 1);
   strxmov(plugin_name_with_prefix_ptr, plugin_dash.str, plugin_name_ptr, NullS);
 
-  if (tmp->load_option != PLUGIN_FORCE &&
-      tmp->load_option != PLUGIN_FORCE_PLUS_PERMANENT)
+  if (!plugin_is_forced(tmp))
   {
     /* support --skip-plugin-foo syntax */
     options[0].name= plugin_name_ptr;
@@ -4017,8 +4022,7 @@ static int test_plugin_options(MEM_ROOT *tmp_root, struct st_plugin_int *tmp,
       my_afree(tmp_backup);
     }
 
-    if (tmp->load_option != PLUGIN_FORCE &&
-        tmp->load_option != PLUGIN_FORCE_PLUS_PERMANENT)
+    if (!plugin_is_forced(tmp))
       opts[0].def_value= opts[1].def_value= plugin_load_option;
 
     error= handle_options(argc, &argv, opts, mark_changed);
@@ -4034,8 +4038,7 @@ static int test_plugin_options(MEM_ROOT *tmp_root, struct st_plugin_int *tmp,
      Set plugin loading policy from option value. First element in the option
      list is always the <plugin name> option value.
     */
-    if (tmp->load_option != PLUGIN_FORCE &&
-        tmp->load_option != PLUGIN_FORCE_PLUS_PERMANENT)
+    if (!plugin_is_forced(tmp))
       plugin_load_option= (enum_plugin_load_option) *(ulong*) opts[0].value;
   }
 
