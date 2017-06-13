@@ -137,10 +137,6 @@ This flag prevents older engines from attempting to open the table and
 allows InnoDB to update_create_info() accordingly. */
 #define DICT_TF_WIDTH_DATA_DIR		1
 
-/** Width of the SHARED tablespace flag (Oracle MYSQL 5.7).
-Not supported by MariaDB. */
-#define DICT_TF_WIDTH_SHARED_SPACE	1
-
 /**
 Width of the page compression flag
 */
@@ -164,7 +160,6 @@ DEFAULT=0, ON = 1, OFF = 2
 			+ DICT_TF_WIDTH_ZIP_SSIZE		\
 			+ DICT_TF_WIDTH_ATOMIC_BLOBS		\
 			+ DICT_TF_WIDTH_DATA_DIR		\
-			+ DICT_TF_WIDTH_SHARED_SPACE		\
 			+ DICT_TF_WIDTH_PAGE_COMPRESSION	\
 			+ DICT_TF_WIDTH_PAGE_COMPRESSION_LEVEL	\
 			+ DICT_TF_WIDTH_ATOMIC_WRITES		\
@@ -185,12 +180,9 @@ DEFAULT=0, ON = 1, OFF = 2
 /** Zero relative shift position of the DATA_DIR field */
 #define DICT_TF_POS_DATA_DIR		(DICT_TF_POS_ATOMIC_BLOBS	\
 					+ DICT_TF_WIDTH_ATOMIC_BLOBS)
-/** Zero relative shift position of the SHARED TABLESPACE field */
-#define DICT_TF_POS_SHARED_SPACE	(DICT_TF_POS_DATA_DIR		\
-					+ DICT_TF_WIDTH_DATA_DIR)
 /** Zero relative shift position of the PAGE_COMPRESSION field */
-#define DICT_TF_POS_PAGE_COMPRESSION	(DICT_TF_POS_SHARED_SPACE	\
-					+ DICT_TF_WIDTH_SHARED_SPACE)
+#define DICT_TF_POS_PAGE_COMPRESSION	(DICT_TF_POS_DATA_DIR		\
+					+ DICT_TF_WIDTH_DATA_DIR)
 /** Zero relative shift position of the PAGE_COMPRESSION_LEVEL field */
 #define DICT_TF_POS_PAGE_COMPRESSION_LEVEL	(DICT_TF_POS_PAGE_COMPRESSION	\
 					+ DICT_TF_WIDTH_PAGE_COMPRESSION)
@@ -294,9 +286,8 @@ ROW_FORMAT=REDUNDANT.  InnoDB engines do not check these flags
 for unknown bits in order to protect backward incompatibility. */
 /* @{ */
 /** Total number of bits in table->flags2. */
-#define DICT_TF2_BITS			9
-#define DICT_TF2_UNUSED_BIT_MASK	(~0U << DICT_TF2_BITS | \
-					 1U << DICT_TF_POS_SHARED_SPACE)
+#define DICT_TF2_BITS			7
+#define DICT_TF2_UNUSED_BIT_MASK	(~0U << DICT_TF2_BITS)
 #define DICT_TF2_BIT_MASK		~DICT_TF2_UNUSED_BIT_MASK
 
 /** TEMPORARY; TRUE for tables from CREATE TEMPORARY TABLE. */
